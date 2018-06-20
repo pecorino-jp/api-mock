@@ -1,0 +1,196 @@
+---
+swagger: "2.0"
+info:
+  description: "Pecorino口座サービスが提供するAPIは、口座管理を行うアプリケーションに有用なインターフェースを提供します。"
+  version: "1.0.0"
+  title: "Pecorino口座サービス"
+  termsOfService: "http://motionpicture.jp"
+  contact:
+    email: "yamazaki@motionpicture.jp"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "pecorino-api-mock.azurewebsites.net"
+basePath: "/"
+tags:
+- name: "Account"
+  description: "口座サービス"
+- name: "DepositTransaction"
+  description: "入金取引サービス"
+- name: "user"
+  description: "Operations about user"
+  externalDocs:
+    description: "Find out more about our store"
+    url: "http://swagger.io"
+schemes:
+- "https"
+- "http"
+paths:
+  /accounts:
+    get:
+      tags:
+      - "Account"
+      summary: "口座を検索します。"
+      description: ""
+      operationId: "searchAccounts"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Account"
+        400:
+          description: "パラメータ不適切"
+      x-swagger-router-controller: "Account"
+    post:
+      tags:
+      - "Account"
+      summary: "口座を新しく開設します。"
+      description: ""
+      operationId: "openAccount"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "口座開設設定"
+        description: "口座番号と口座名義を指定します。Pecorinoサービス内(ひとつのPecorinoAPIエンドポイント)でユニークとな\
+          るように指定側で管理すること。 重複すればステータスコード409が返されます。"
+        required: true
+        schema:
+          $ref: "#/definitions/OpenAccountParams"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Account"
+        400:
+          description: "パラメータ不適切"
+        409:
+          description: "口座番号重複"
+      security:
+      - adminAuth: []
+      x-swagger-router-controller: "Account"
+  /accounts/{accountNumber}/close:
+    put:
+      tags:
+      - "Account"
+      summary: "口座を解約します。"
+      description: ""
+      operationId: "closeAccount"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "accountNumber"
+        in: "path"
+        description: "口座番号"
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "successful operation"
+        404:
+          description: "口座存在なし"
+      security:
+      - adminAuth: []
+      x-swagger-router-controller: "Account"
+  /transactions/deposit/start:
+    post:
+      tags:
+      - "DepositTransaction"
+      summary: ""
+      description: "入金取引を開始します。取引の期限が切れると取引を確定することはできなくなります。 アプリケーション側で十分な期間を想定し、期\
+        限をセットしてください。"
+      operationId: "startDepositTransaction"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/DepositTransaction"
+      security:
+      - adminAuth: []
+      x-swagger-router-controller: "DepositTransaction"
+  /transactions/deposit/{transactionId}/confirm:
+    put:
+      tags:
+      - "DepositTransaction"
+      summary: ""
+      description: "入金取引を確定します。有効期限を超過していた場合、ステータスコード400を返却します。"
+      operationId: "confirmDepositTransaction"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "transactionId"
+        in: "path"
+        description: "取引ID"
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "successful operation"
+        400:
+          description: "Bad Request"
+      x-swagger-router-controller: "DepositTransaction"
+  /transactions/deposit/{transactionId}/cancel:
+    put:
+      tags:
+      - "DepositTransaction"
+      summary: ""
+      description: "入金取引を中止します。すでに確定済の場合、ステータスコード400を返却します。"
+      operationId: "cancelDepositTransaction"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "transactionId"
+        in: "path"
+        description: "取引ID"
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "successful operation"
+        400:
+          description: "Bad Request"
+      x-swagger-router-controller: "DepositTransaction"
+securityDefinitions:
+  adminAuth:
+    type: "oauth2"
+    tokenUrl: "http://petstore.swagger.io/oauth/dialog"
+    flow: "application"
+definitions:
+  Account:
+    type: "object"
+    properties:
+      accountNumber:
+        type: "string"
+    example:
+      accountNumber: "accountNumber"
+  DepositTransaction:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+    example:
+      id: "id"
+  OpenAccountParams:
+    type: "object"
+    required:
+    - "name"
+    properties:
+      accountNumber:
+        type: "string"
+      name:
+        type: "string"
+    example:
+      name: "name"
+      accountNumber: "accountNumber"
