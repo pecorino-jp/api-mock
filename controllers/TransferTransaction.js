@@ -1,11 +1,11 @@
 'use strict';
 
 var utils = require('../utils/writer.js');
-var DepositTransaction = require('../service/DepositTransactionService');
+var TransferTransaction = require('../service/TransferTransactionService');
 
-module.exports.cancelDepositTransaction = function cancelDepositTransaction (req, res, next) {
+module.exports.cancelTransferTransaction = function cancelTransferTransaction (req, res, next) {
   var transactionId = req.swagger.params['transactionId'].value;
-  DepositTransaction.cancelDepositTransaction(transactionId)
+  TransferTransaction.cancelTransferTransaction(transactionId)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -14,9 +14,9 @@ module.exports.cancelDepositTransaction = function cancelDepositTransaction (req
     });
 };
 
-module.exports.confirmDepositTransaction = function confirmDepositTransaction (req, res, next) {
+module.exports.confirmTransferTransaction = function confirmTransferTransaction (req, res, next) {
   var transactionId = req.swagger.params['transactionId'].value;
-  DepositTransaction.confirmDepositTransaction(transactionId)
+  TransferTransaction.confirmTransferTransaction(transactionId)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -25,9 +25,9 @@ module.exports.confirmDepositTransaction = function confirmDepositTransaction (r
     });
 };
 
-module.exports.startDepositTransaction = function startDepositTransaction (req, res, next) {
+module.exports.startTransferTransaction = function startTransferTransaction (req, res, next) {
   var body = req.swagger.params['body'].value;
-  DepositTransaction.startDepositTransaction(body)
+  TransferTransaction.startTransferTransaction(body)
     .then(function (response) {
       utils.writeJson(res, response);
     })

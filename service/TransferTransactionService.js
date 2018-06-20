@@ -8,7 +8,7 @@
  * transactionId String 取引ID
  * no response value expected for this operation
  **/
-exports.cancelDepositTransaction = function(transactionId) {
+exports.cancelTransferTransaction = function(transactionId) {
   return new Promise(function(resolve, reject) {
     resolve();
   });
@@ -22,7 +22,7 @@ exports.cancelDepositTransaction = function(transactionId) {
  * transactionId String 取引ID
  * no response value expected for this operation
  **/
-exports.confirmDepositTransaction = function(transactionId) {
+exports.confirmTransferTransaction = function(transactionId) {
   return new Promise(function(resolve, reject) {
     resolve();
   });
@@ -33,10 +33,10 @@ exports.confirmDepositTransaction = function(transactionId) {
  * 
  * 取引を開始します。取引の期限が切れると取引を確定することはできなくなります。 アプリケーション側で十分な期間を想定し、期限をセットしてください。
  *
- * body StartDepositTransactionParams 
- * returns DepositTransaction
+ * body StartTransferTransactionParams 
+ * returns TransferTransaction
  **/
-exports.startDepositTransaction = function(body) {
+exports.startTransferTransaction = function(body) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = {

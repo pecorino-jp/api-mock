@@ -17,11 +17,10 @@ tags:
   description: "口座サービス"
 - name: "DepositTransaction"
   description: "入金取引サービス"
-- name: "user"
-  description: "Operations about user"
-  externalDocs:
-    description: "Find out more about our store"
-    url: "http://swagger.io"
+- name: "WithdrawTransaction"
+  description: "出金取引サービス"
+- name: "TransferTransaction"
+  description: "転送取引サービス"
 schemes:
 - "https"
 - "http"
@@ -101,17 +100,47 @@ paths:
       security:
       - adminAuth: []
       x-swagger-router-controller: "Account"
+  /accounts/{accountNumber}/actions/moneyTransfer:
+    get:
+      tags:
+      - "Account"
+      summary: "口座の取引履歴を検索します。"
+      description: ""
+      operationId: "searchMoneyTransferActions"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "accountNumber"
+        in: "path"
+        description: "口座番号"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/MoneyTransferAction"
+      security:
+      - adminAuth: []
+      x-swagger-router-controller: "Account"
   /transactions/deposit/start:
     post:
       tags:
       - "DepositTransaction"
       summary: ""
-      description: "入金取引を開始します。取引の期限が切れると取引を確定することはできなくなります。 アプリケーション側で十分な期間を想定し、期\
-        限をセットしてください。"
+      description: "取引を開始します。取引の期限が切れると取引を確定することはできなくなります。 アプリケーション側で十分な期間を想定し、期限を\
+        セットしてください。"
       operationId: "startDepositTransaction"
       produces:
       - "application/json"
-      parameters: []
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/StartDepositTransactionParams"
       responses:
         200:
           description: "successful operation"
@@ -125,7 +154,7 @@ paths:
       tags:
       - "DepositTransaction"
       summary: ""
-      description: "入金取引を確定します。有効期限を超過していた場合、ステータスコード400を返却します。"
+      description: "取引を確定します。有効期限を超過していた場合、ステータスコード400を返却します。"
       operationId: "confirmDepositTransaction"
       produces:
       - "application/json"
@@ -146,7 +175,7 @@ paths:
       tags:
       - "DepositTransaction"
       summary: ""
-      description: "入金取引を中止します。すでに確定済の場合、ステータスコード400を返却します。"
+      description: "取引を中止します。すでに確定済の場合、ステータスコード400を返却します。"
       operationId: "cancelDepositTransaction"
       produces:
       - "application/json"
@@ -162,10 +191,142 @@ paths:
         400:
           description: "Bad Request"
       x-swagger-router-controller: "DepositTransaction"
+  /transactions/withdraw/start:
+    post:
+      tags:
+      - "WithdrawTransaction"
+      summary: ""
+      description: "取引を開始します。取引の期限が切れると取引を確定することはできなくなります。 アプリケーション側で十分な期間を想定し、期限を\
+        セットしてください。"
+      operationId: "startWithdrawTransaction"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/StartWithdrawTransactionParams"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/WithdrawTransaction"
+      security:
+      - adminAuth: []
+      x-swagger-router-controller: "WithdrawTransaction"
+  /transactions/withdraw/{transactionId}/confirm:
+    put:
+      tags:
+      - "WithdrawTransaction"
+      summary: ""
+      description: "取引を確定します。有効期限を超過していた場合、ステータスコード400を返却します。"
+      operationId: "confirmWithdrawTransaction"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "transactionId"
+        in: "path"
+        description: "取引ID"
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "successful operation"
+        400:
+          description: "Bad Request"
+      x-swagger-router-controller: "WithdrawTransaction"
+  /transactions/withdraw/{transactionId}/cancel:
+    put:
+      tags:
+      - "WithdrawTransaction"
+      summary: ""
+      description: "取引を中止します。すでに確定済の場合、ステータスコード400を返却します。"
+      operationId: "cancelWithdrawTransaction"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "transactionId"
+        in: "path"
+        description: "取引ID"
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "successful operation"
+        400:
+          description: "Bad Request"
+      x-swagger-router-controller: "WithdrawTransaction"
+  /transactions/transfer/start:
+    post:
+      tags:
+      - "TransferTransaction"
+      summary: ""
+      description: "取引を開始します。取引の期限が切れると取引を確定することはできなくなります。 アプリケーション側で十分な期間を想定し、期限を\
+        セットしてください。"
+      operationId: "startTransferTransaction"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/StartTransferTransactionParams"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/TransferTransaction"
+      security:
+      - adminAuth: []
+      x-swagger-router-controller: "TransferTransaction"
+  /transactions/transfer/{transactionId}/confirm:
+    put:
+      tags:
+      - "TransferTransaction"
+      summary: ""
+      description: "取引を確定します。有効期限を超過していた場合、ステータスコード400を返却します。"
+      operationId: "confirmTransferTransaction"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "transactionId"
+        in: "path"
+        description: "取引ID"
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "successful operation"
+        400:
+          description: "Bad Request"
+      x-swagger-router-controller: "TransferTransaction"
+  /transactions/transfer/{transactionId}/cancel:
+    put:
+      tags:
+      - "TransferTransaction"
+      summary: ""
+      description: "取引を中止します。すでに確定済の場合、ステータスコード400を返却します。"
+      operationId: "cancelTransferTransaction"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "transactionId"
+        in: "path"
+        description: "取引ID"
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "successful operation"
+        400:
+          description: "Bad Request"
+      x-swagger-router-controller: "TransferTransaction"
 securityDefinitions:
   adminAuth:
     type: "oauth2"
-    tokenUrl: "http://petstore.swagger.io/oauth/dialog"
+    tokenUrl: "https://pecorino-admin-development.auth.ap-northeast-1.amazoncognito.com/oauth2/token"
     flow: "application"
 definitions:
   Account:
@@ -173,24 +334,392 @@ definitions:
     properties:
       accountNumber:
         type: "string"
+        description: "口座番号"
+      name:
+        type: "string"
+        description: "口座名義"
+      balance:
+        type: "integer"
+        description: "残高"
+      availableBalance:
+        type: "integer"
+        description: "利用可能残高"
+    description: "口座"
     example:
+      balance: 0
+      name: "name"
       accountNumber: "accountNumber"
+      availableBalance: 6
+  OpenAccountParams:
+    type: "object"
+    properties:
+      accountNumber:
+        type: "string"
+        description: "口座番号"
+      name:
+        type: "string"
+        description: "口座名義"
+    example:
+      name: "name"
+      accountNumber: "accountNumber"
+  TransactionStatus:
+    type: "string"
+    description: "取引状況"
+    enum:
+    - "InProgress"
+    - "Canceled"
+    - "Confirmed"
+    - "Expired"
+  TransactionAgent:
+    type: "object"
+    properties:
+      typeOf:
+        type: "string"
+        description: "進行人タイプ"
+      id:
+        type: "string"
+        description: "進行人ID"
+      name:
+        type: "string"
+        description: "進行人名"
+      url:
+        type: "string"
+        description: "進行人URL"
+    description: "取引進行人"
+    example:
+      name: "name"
+      id: "id"
+      typeOf: "typeOf"
+      url: "url"
+  TransactionRecipient:
+    type: "object"
+    properties:
+      typeOf:
+        type: "string"
+        description: "受取人タイプ"
+      id:
+        type: "string"
+        description: "受取人ID"
+      name:
+        type: "string"
+        description: "受取人名"
+      url:
+        type: "string"
+        description: "受取人URL"
+    description: "取引受取人"
+    example:
+      name: "name"
+      id: "id"
+      typeOf: "typeOf"
+      url: "url"
+  StartDepositTransactionParams:
+    type: "object"
+    properties:
+      toAccountNumber:
+        type: "string"
+        description: "入金先口座番号"
+      expires:
+        type: "string"
+        format: "date-time"
+        description: "取引期限"
+      agent:
+        $ref: "#/definitions/TransactionAgent"
+      recipient:
+        $ref: "#/definitions/TransactionRecipient"
+      amount:
+        type: "integer"
+        description: "金額"
+      notes:
+        type: "string"
+        description: "取引説明"
+    description: "入金取引開始パラメーター"
+    example:
+      expires: "2000-01-23T04:56:07.000+00:00"
+      agent:
+        name: "name"
+        id: "id"
+        typeOf: "typeOf"
+        url: "url"
+      amount: 0
+      notes: "notes"
+      toAccountNumber: "toAccountNumber"
+      recipient:
+        name: "name"
+        id: "id"
+        typeOf: "typeOf"
+        url: "url"
+  StartWithdrawTransactionParams:
+    type: "object"
+    properties:
+      fromAccountNumber:
+        type: "string"
+        description: "出金元口座番号"
+      expires:
+        type: "string"
+        format: "date-time"
+        description: "取引期限"
+      agent:
+        $ref: "#/definitions/TransactionAgent"
+      recipient:
+        $ref: "#/definitions/TransactionRecipient"
+      amount:
+        type: "integer"
+        description: "金額"
+      notes:
+        type: "string"
+        description: "取引説明"
+    description: "出金取引開始パラメーター"
+    example:
+      fromAccountNumber: "fromAccountNumber"
+      expires: "2000-01-23T04:56:07.000+00:00"
+      agent:
+        name: "name"
+        id: "id"
+        typeOf: "typeOf"
+        url: "url"
+      amount: 0
+      notes: "notes"
+      recipient:
+        name: "name"
+        id: "id"
+        typeOf: "typeOf"
+        url: "url"
+  StartTransferTransactionParams:
+    type: "object"
+    properties:
+      fromAccountNumber:
+        type: "string"
+        description: "転送元口座番号"
+      toAccountNumber:
+        type: "string"
+        description: "転送先口座番号"
+      expires:
+        type: "string"
+        format: "date-time"
+        description: "取引期限"
+      agent:
+        $ref: "#/definitions/TransactionAgent"
+      recipient:
+        $ref: "#/definitions/TransactionRecipient"
+      amount:
+        type: "integer"
+        description: "金額"
+      notes:
+        type: "string"
+        description: "取引説明"
+    description: "転送取引開始パラメーター"
+    example:
+      fromAccountNumber: "fromAccountNumber"
+      expires: "2000-01-23T04:56:07.000+00:00"
+      agent:
+        name: "name"
+        id: "id"
+        typeOf: "typeOf"
+        url: "url"
+      amount: 0
+      notes: "notes"
+      toAccountNumber: "toAccountNumber"
+      recipient:
+        name: "name"
+        id: "id"
+        typeOf: "typeOf"
+        url: "url"
   DepositTransaction:
     type: "object"
     properties:
       id:
         type: "string"
+        description: "取引ID"
+      status:
+        $ref: "#/definitions/TransactionStatus"
+      startDate:
+        type: "string"
+        format: "date-time"
+        description: "開始日時"
+      endDate:
+        type: "string"
+        format: "date-time"
+        description: "終了日時"
+      expires:
+        type: "string"
+        format: "date-time"
+        description: "確定期限"
+      agent:
+        $ref: "#/definitions/TransactionAgent"
+      recipient:
+        $ref: "#/definitions/TransactionRecipient"
+    description: "入金取引"
     example:
+      expires: "2000-01-23T04:56:07.000+00:00"
+      agent:
+        name: "name"
+        id: "id"
+        typeOf: "typeOf"
+        url: "url"
+      endDate: "2000-01-23T04:56:07.000+00:00"
+      recipient:
+        name: "name"
+        id: "id"
+        typeOf: "typeOf"
+        url: "url"
       id: "id"
-  OpenAccountParams:
+      startDate: "2000-01-23T04:56:07.000+00:00"
+      status: {}
+  WithdrawTransaction:
     type: "object"
-    required:
-    - "name"
     properties:
+      id:
+        type: "string"
+        description: "取引ID"
+      status:
+        $ref: "#/definitions/TransactionStatus"
+      startDate:
+        type: "string"
+        format: "date-time"
+        description: "開始日時"
+      endDate:
+        type: "string"
+        format: "date-time"
+        description: "終了日時"
+      expires:
+        type: "string"
+        format: "date-time"
+        description: "確定期限"
+      agent:
+        $ref: "#/definitions/TransactionAgent"
+      recipient:
+        $ref: "#/definitions/TransactionRecipient"
+    description: "出金取引"
+    example:
+      expires: "2000-01-23T04:56:07.000+00:00"
+      agent:
+        name: "name"
+        id: "id"
+        typeOf: "typeOf"
+        url: "url"
+      endDate: "2000-01-23T04:56:07.000+00:00"
+      recipient:
+        name: "name"
+        id: "id"
+        typeOf: "typeOf"
+        url: "url"
+      id: "id"
+      startDate: "2000-01-23T04:56:07.000+00:00"
+      status: {}
+  TransferTransaction:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        description: "取引ID"
+      status:
+        $ref: "#/definitions/TransactionStatus"
+      startDate:
+        type: "string"
+        format: "date-time"
+        description: "開始日時"
+      endDate:
+        type: "string"
+        format: "date-time"
+        description: "終了日時"
+      expires:
+        type: "string"
+        format: "date-time"
+        description: "確定期限"
+      agent:
+        $ref: "#/definitions/TransactionAgent"
+      recipient:
+        $ref: "#/definitions/TransactionRecipient"
+    description: "転送取引"
+    example:
+      expires: "2000-01-23T04:56:07.000+00:00"
+      agent:
+        name: "name"
+        id: "id"
+        typeOf: "typeOf"
+        url: "url"
+      endDate: "2000-01-23T04:56:07.000+00:00"
+      recipient:
+        name: "name"
+        id: "id"
+        typeOf: "typeOf"
+        url: "url"
+      id: "id"
+      startDate: "2000-01-23T04:56:07.000+00:00"
+      status: {}
+  MoneyTransferAction:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        description: "取引ID"
+      status:
+        type: "string"
+        description: "取引ID"
+      startDate:
+        type: "string"
+        format: "date-time"
+        description: "開始日時"
+      endDate:
+        type: "string"
+        format: "date-time"
+        description: "終了日時"
+      purpose:
+        type: "object"
+        description: "取引"
+        properties: {}
+      amount:
+        type: "integer"
+        description: "金額"
+      fromLocation:
+        $ref: "#/definitions/MoneyTransferAction_fromLocation"
+      toLocation:
+        $ref: "#/definitions/MoneyTransferAction_toLocation"
+    description: "転送アクション"
+    example:
+      amount: 0
+      endDate: "2000-01-23T04:56:07.000+00:00"
+      purpose: "{}"
+      id: "id"
+      fromLocation:
+        name: "name"
+        accountNumber: "accountNumber"
+        typeOf: "typeOf"
+      toLocation:
+        name: "name"
+        accountNumber: "accountNumber"
+        typeOf: "typeOf"
+      startDate: "2000-01-23T04:56:07.000+00:00"
+      status: "status"
+  MoneyTransferAction_fromLocation:
+    properties:
+      typeOf:
+        type: "string"
+        description: "口座タイプ"
       accountNumber:
         type: "string"
+        description: "口座番号"
       name:
         type: "string"
+        description: "名前"
+    description: "転送元"
     example:
       name: "name"
       accountNumber: "accountNumber"
+      typeOf: "typeOf"
+  MoneyTransferAction_toLocation:
+    properties:
+      typeOf:
+        type: "string"
+        description: "口座タイプ"
+      accountNumber:
+        type: "string"
+        description: "口座番号"
+      name:
+        type: "string"
+        description: "名前"
+    description: "転送先"
+    example:
+      name: "name"
+      accountNumber: "accountNumber"
+      typeOf: "typeOf"

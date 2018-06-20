@@ -34,3 +34,14 @@ module.exports.searchAccounts = function searchAccounts (req, res, next) {
       utils.writeJson(res, response);
     });
 };
+
+module.exports.searchMoneyTransferActions = function searchMoneyTransferActions (req, res, next) {
+  var accountNumber = req.swagger.params['accountNumber'].value;
+  Account.searchMoneyTransferActions(accountNumber)
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
+};
