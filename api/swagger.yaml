@@ -13,14 +13,14 @@ info:
 host: "pecorino-api-mock.azurewebsites.net"
 basePath: "/"
 tags:
-- name: "Account"
-  description: "口座サービス"
-- name: "DepositTransaction"
-  description: "入金取引サービス"
-- name: "WithdrawTransaction"
-  description: "出金取引サービス"
-- name: "TransferTransaction"
-  description: "転送取引サービス"
+- name: "口座エンドポイント"
+  description: "口座を管理するエンドポイントです。"
+- name: "入金取引エンドポイント"
+  description: "入金取引を管理するエンドポイントです。"
+- name: "出金取引エンドポイント"
+  description: "出金取引を管理するエンドポイントです。"
+- name: "転送取引エンドポイント"
+  description: "転送取引を管理するエンドポイントです。"
 schemes:
 - "https"
 - "http"
@@ -28,9 +28,9 @@ paths:
   /accounts:
     get:
       tags:
-      - "Account"
+      - "口座エンドポイント"
       summary: "口座検索"
-      description: ""
+      description: "口座検索"
       operationId: "searchAccounts"
       consumes:
       - "application/json"
@@ -49,9 +49,9 @@ paths:
       x-swagger-router-controller: "Account"
     post:
       tags:
-      - "Account"
+      - "口座エンドポイント"
       summary: "口座開設"
-      description: ""
+      description: "口座開設"
       operationId: "openAccount"
       consumes:
       - "application/json"
@@ -80,9 +80,9 @@ paths:
   /accounts/{accountNumber}/close:
     put:
       tags:
-      - "Account"
+      - "口座エンドポイント"
       summary: "口座解約"
-      description: ""
+      description: "口座解約"
       operationId: "closeAccount"
       produces:
       - "application/json"
@@ -103,9 +103,9 @@ paths:
   /accounts/{accountNumber}/actions/moneyTransfer:
     get:
       tags:
-      - "Account"
+      - "口座エンドポイント"
       summary: "口座取引履歴検索"
-      description: ""
+      description: "口座取引履歴検索"
       operationId: "searchMoneyTransferActions"
       produces:
       - "application/json"
@@ -128,7 +128,7 @@ paths:
   /transactions/deposit/start:
     post:
       tags:
-      - "DepositTransaction"
+      - "入金取引エンドポイント"
       summary: "入金取引開始"
       description: "取引を開始します。取引の期限が切れると取引を確定することはできなくなります。 アプリケーション側で十分な期間を想定し、期限を\
         セットしてください。"
@@ -152,7 +152,7 @@ paths:
   /transactions/deposit/{transactionId}/confirm:
     put:
       tags:
-      - "DepositTransaction"
+      - "入金取引エンドポイント"
       summary: "入金取引確定"
       description: "取引を確定します。有効期限を超過していた場合、ステータスコード400を返却します。"
       operationId: "confirmDepositTransaction"
@@ -173,7 +173,7 @@ paths:
   /transactions/deposit/{transactionId}/cancel:
     put:
       tags:
-      - "DepositTransaction"
+      - "入金取引エンドポイント"
       summary: "入金取引中止"
       description: "取引を中止します。すでに確定済の場合、ステータスコード400を返却します。"
       operationId: "cancelDepositTransaction"
@@ -194,7 +194,7 @@ paths:
   /transactions/withdraw/start:
     post:
       tags:
-      - "WithdrawTransaction"
+      - "出金取引エンドポイント"
       summary: "出金取引開始"
       description: "取引を開始します。取引の期限が切れると取引を確定することはできなくなります。 アプリケーション側で十分な期間を想定し、期限を\
         セットしてください。"
@@ -218,7 +218,7 @@ paths:
   /transactions/withdraw/{transactionId}/confirm:
     put:
       tags:
-      - "WithdrawTransaction"
+      - "出金取引エンドポイント"
       summary: "出金取引確定"
       description: "取引を確定します。有効期限を超過していた場合、ステータスコード400を返却します。"
       operationId: "confirmWithdrawTransaction"
@@ -239,7 +239,7 @@ paths:
   /transactions/withdraw/{transactionId}/cancel:
     put:
       tags:
-      - "WithdrawTransaction"
+      - "出金取引エンドポイント"
       summary: "出金取引中止"
       description: "取引を中止します。すでに確定済の場合、ステータスコード400を返却します。"
       operationId: "cancelWithdrawTransaction"
@@ -260,7 +260,7 @@ paths:
   /transactions/transfer/start:
     post:
       tags:
-      - "TransferTransaction"
+      - "転送取引エンドポイント"
       summary: "転送取引開始"
       description: "取引を開始します。取引の期限が切れると取引を確定することはできなくなります。 アプリケーション側で十分な期間を想定し、期限を\
         セットしてください。"
@@ -284,7 +284,7 @@ paths:
   /transactions/transfer/{transactionId}/confirm:
     put:
       tags:
-      - "TransferTransaction"
+      - "転送取引エンドポイント"
       summary: "転送取引確定"
       description: "取引を確定します。有効期限を超過していた場合、ステータスコード400を返却します。"
       operationId: "confirmTransferTransaction"
@@ -305,7 +305,7 @@ paths:
   /transactions/transfer/{transactionId}/cancel:
     put:
       tags:
-      - "TransferTransaction"
+      - "転送取引エンドポイント"
       summary: "転送取引中止"
       description: "取引を中止します。すでに確定済の場合、ステータスコード400を返却します。"
       operationId: "cancelTransferTransaction"
