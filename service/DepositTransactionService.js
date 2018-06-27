@@ -2,7 +2,7 @@
 
 
 /**
- * 
+ * 入金取引中止
  * 取引を中止します。すでに確定済の場合、ステータスコード400を返却します。
  *
  * transactionId String 取引ID
@@ -16,7 +16,7 @@ exports.cancelDepositTransaction = function(transactionId) {
 
 
 /**
- * 
+ * 入金取引確定
  * 取引を確定します。有効期限を超過していた場合、ステータスコード400を返却します。
  *
  * transactionId String 取引ID
@@ -30,7 +30,7 @@ exports.confirmDepositTransaction = function(transactionId) {
 
 
 /**
- * 
+ * 入金取引開始
  * 取引を開始します。取引の期限が切れると取引を確定することはできなくなります。 アプリケーション側で十分な期間を想定し、期限をセットしてください。
  *
  * body StartDepositTransactionParams 

@@ -4,8 +4,8 @@
   "description": "Pecorino口座サービスが提供するAPIは、口座管理を行うアプリケーションに有用なインターフェースを提供します。",
   "main": "index.js",
   "scripts": {
-    "prestart": "npm install",
-    "start": "node index.js"
+	"prestart": "npm install",
+	"start": "node index.js"
   },
   "keywords": [
     "swagger"

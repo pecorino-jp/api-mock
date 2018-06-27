@@ -2,7 +2,7 @@
 
 
 /**
- * 口座を解約します。
+ * 口座解約
  * 
  *
  * accountNumber String 口座番号
@@ -16,7 +16,7 @@ exports.closeAccount = function(accountNumber) {
 
 
 /**
- * 口座を新しく開設します。
+ * 口座開設
  * 
  *
  * 口座開設設定 OpenAccountParams 口座番号と口座名義を指定します。Pecorinoサービス内(ひとつのPecorinoAPIエンドポイント)でユニークとなるように指定側で管理すること。 重複すればステータスコード409が返されます。
@@ -41,7 +41,7 @@ exports.openAccount = function(口座開設設定) {
 
 
 /**
- * 口座を検索します。
+ * 口座検索
  * 
  *
  * returns List
@@ -70,7 +70,7 @@ exports.searchAccounts = function() {
 
 
 /**
- * 口座の取引履歴を検索します。
+ * 口座取引履歴検索
  * 
  *
  * accountNumber String 口座番号

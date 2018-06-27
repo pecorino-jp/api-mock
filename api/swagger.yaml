@@ -29,7 +29,7 @@ paths:
     get:
       tags:
       - "Account"
-      summary: "口座を検索します。"
+      summary: "口座検索"
       description: ""
       operationId: "searchAccounts"
       consumes:
@@ -50,7 +50,7 @@ paths:
     post:
       tags:
       - "Account"
-      summary: "口座を新しく開設します。"
+      summary: "口座開設"
       description: ""
       operationId: "openAccount"
       consumes:
@@ -81,7 +81,7 @@ paths:
     put:
       tags:
       - "Account"
-      summary: "口座を解約します。"
+      summary: "口座解約"
       description: ""
       operationId: "closeAccount"
       produces:
@@ -104,7 +104,7 @@ paths:
     get:
       tags:
       - "Account"
-      summary: "口座の取引履歴を検索します。"
+      summary: "口座取引履歴検索"
       description: ""
       operationId: "searchMoneyTransferActions"
       produces:
@@ -129,7 +129,7 @@ paths:
     post:
       tags:
       - "DepositTransaction"
-      summary: ""
+      summary: "入金取引開始"
       description: "取引を開始します。取引の期限が切れると取引を確定することはできなくなります。 アプリケーション側で十分な期間を想定し、期限を\
         セットしてください。"
       operationId: "startDepositTransaction"
@@ -153,7 +153,7 @@ paths:
     put:
       tags:
       - "DepositTransaction"
-      summary: ""
+      summary: "入金取引確定"
       description: "取引を確定します。有効期限を超過していた場合、ステータスコード400を返却します。"
       operationId: "confirmDepositTransaction"
       produces:
@@ -174,7 +174,7 @@ paths:
     put:
       tags:
       - "DepositTransaction"
-      summary: ""
+      summary: "入金取引中止"
       description: "取引を中止します。すでに確定済の場合、ステータスコード400を返却します。"
       operationId: "cancelDepositTransaction"
       produces:
@@ -195,7 +195,7 @@ paths:
     post:
       tags:
       - "WithdrawTransaction"
-      summary: ""
+      summary: "出金取引開始"
       description: "取引を開始します。取引の期限が切れると取引を確定することはできなくなります。 アプリケーション側で十分な期間を想定し、期限を\
         セットしてください。"
       operationId: "startWithdrawTransaction"
@@ -219,7 +219,7 @@ paths:
     put:
       tags:
       - "WithdrawTransaction"
-      summary: ""
+      summary: "出金取引確定"
       description: "取引を確定します。有効期限を超過していた場合、ステータスコード400を返却します。"
       operationId: "confirmWithdrawTransaction"
       produces:
@@ -240,7 +240,7 @@ paths:
     put:
       tags:
       - "WithdrawTransaction"
-      summary: ""
+      summary: "出金取引中止"
       description: "取引を中止します。すでに確定済の場合、ステータスコード400を返却します。"
       operationId: "cancelWithdrawTransaction"
       produces:
@@ -261,7 +261,7 @@ paths:
     post:
       tags:
       - "TransferTransaction"
-      summary: ""
+      summary: "転送取引開始"
       description: "取引を開始します。取引の期限が切れると取引を確定することはできなくなります。 アプリケーション側で十分な期間を想定し、期限を\
         セットしてください。"
       operationId: "startTransferTransaction"
@@ -285,7 +285,7 @@ paths:
     put:
       tags:
       - "TransferTransaction"
-      summary: ""
+      summary: "転送取引確定"
       description: "取引を確定します。有効期限を超過していた場合、ステータスコード400を返却します。"
       operationId: "confirmTransferTransaction"
       produces:
@@ -306,7 +306,7 @@ paths:
     put:
       tags:
       - "TransferTransaction"
-      summary: ""
+      summary: "転送取引中止"
       description: "取引を中止します。すでに確定済の場合、ステータスコード400を返却します。"
       operationId: "cancelTransferTransaction"
       produces:
