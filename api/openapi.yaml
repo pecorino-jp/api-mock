@@ -1,0 +1,726 @@
+---
+openapi: "3.0.0"
+info:
+  description: "Pecorino口座サービスが提供するAPIは、口座管理を行うアプリケーションに有用なインターフェースを提供します。"
+  version: "1.0.0"
+  title: "Pecorino口座サービス"
+  termsOfService: "http://motionpicture.jp"
+  contact:
+    email: "yamazaki@motionpicture.jp"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+servers:
+  - url: https://pecorino-api-mock.azurewebsites.net
+    description: Mock server
+  # - url: https://api.example.com/v1
+  #   description: Production server (uses live data)
+  # - url: https://sandbox-api.example.com:8443/v1
+  #   description: Sandbox server (uses test data)
+tags:
+- name: "口座エンドポイント"
+  description: "口座を管理するエンドポイントです。"
+- name: "入金取引エンドポイント"
+  description: "入金取引を管理するエンドポイントです。"
+- name: "出金取引エンドポイント"
+  description: "出金取引を管理するエンドポイントです。"
+- name: "転送取引エンドポイント"
+  description: "転送取引を管理するエンドポイントです。"
+paths:
+  /accounts:
+    get:
+      tags:
+      - "口座エンドポイント"
+      summary: "口座検索"
+      description: "口座検索"
+      operationId: "searchAccounts"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Account"
+        400:
+          description: "パラメータ不適切"
+    post:
+      tags:
+      - "口座エンドポイント"
+      summary: "口座開設"
+      description: "口座開設"
+      operationId: "openAccount"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OpenAccountParams"
+        description: "口座番号と口座名義を指定します。Pecorinoサービス内(ひとつのPecorinoAPIエンドポイント)でユニークとな\
+          るように指定側で管理すること。 重複すればステータスコード409が返されます。"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+        400:
+          description: "パラメータ不適切"
+        409:
+          description: "口座番号重複"
+      security:
+      - adminAuth: []
+  /accounts/{accountNumber}/close:
+    put:
+      tags:
+      - "口座エンドポイント"
+      summary: "口座解約"
+      description: "口座解約"
+      operationId: "closeAccount"
+      parameters:
+        - in: path
+          name: accountNumber
+          schema:
+            type: string
+          required: true
+          description: 口座番号
+      responses:
+        204:
+          description: "successful operation"
+        404:
+          description: "口座存在なし"
+      security:
+      - adminAuth: []
+  /accounts/{accountNumber}/actions/moneyTransfer:
+    get:
+      tags:
+      - "口座エンドポイント"
+      summary: "口座取引履歴検索"
+      description: "口座取引履歴検索"
+      operationId: "searchMoneyTransferActions"
+      parameters:
+        - in: path
+          name: accountNumber
+          schema:
+            type: string
+          required: true
+          description: 口座番号
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              # schema:
+              #   oneOf:
+              #     - $ref: "#/components/schemas/MoneyTransferAction_fromLocation"
+              #     - $ref: "#/components/schemas/MoneyTransferAction_fromLocation"
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MoneyTransferAction"
+      security:
+      - adminAuth: []
+  /transactions/deposit/start:
+    post:
+      tags:
+      - "入金取引エンドポイント"
+      summary: "入金取引開始"
+      description: "取引を開始します。取引の期限が切れると取引を確定することはできなくなります。 アプリケーション側で十分な期間を想定し、期限を\
+        セットしてください。"
+      operationId: "startDepositTransaction"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StartDepositTransactionParams"
+        description: ""
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepositTransaction"
+      security:
+      - adminAuth: []
+  /transactions/deposit/{transactionId}/confirm:
+    put:
+      tags:
+      - "入金取引エンドポイント"
+      summary: "入金取引確定"
+      description: "取引を確定します。有効期限を超過していた場合、ステータスコード400を返却します。"
+      operationId: "confirmDepositTransaction"
+      parameters:
+        - in: path
+          name: transactionId
+          schema:
+            type: string
+          required: true
+          description: 取引ID
+      responses:
+        204:
+          description: "successful operation"
+        400:
+          description: "Bad Request"
+  /transactions/deposit/{transactionId}/cancel:
+    put:
+      tags:
+      - "入金取引エンドポイント"
+      summary: "入金取引中止"
+      description: "取引を中止します。すでに確定済の場合、ステータスコード400を返却します。"
+      operationId: "cancelDepositTransaction"
+      parameters:
+        - in: path
+          name: transactionId
+          schema:
+            type: string
+          required: true
+          description: 取引ID
+      responses:
+        204:
+          description: "successful operation"
+        400:
+          description: "Bad Request"
+  /transactions/withdraw/start:
+    post:
+      tags:
+      - "出金取引エンドポイント"
+      summary: "出金取引開始"
+      description: "取引を開始します。取引の期限が切れると取引を確定することはできなくなります。 アプリケーション側で十分な期間を想定し、期限を\
+        セットしてください。"
+      operationId: "startWithdrawTransaction"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StartWithdrawTransactionParams"
+        description: ""
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WithdrawTransaction"
+      security:
+      - adminAuth: []
+  /transactions/withdraw/{transactionId}/confirm:
+    put:
+      tags:
+      - "出金取引エンドポイント"
+      summary: "出金取引確定"
+      description: "取引を確定します。有効期限を超過していた場合、ステータスコード400を返却します。"
+      operationId: "confirmWithdrawTransaction"
+      parameters:
+        - in: path
+          name: transactionId
+          schema:
+            type: string
+          required: true
+          description: 取引ID
+      responses:
+        204:
+          description: "successful operation"
+        400:
+          description: "Bad Request"
+  /transactions/withdraw/{transactionId}/cancel:
+    put:
+      tags:
+      - "出金取引エンドポイント"
+      summary: "出金取引中止"
+      description: "取引を中止します。すでに確定済の場合、ステータスコード400を返却します。"
+      operationId: "cancelWithdrawTransaction"
+      parameters:
+        - in: path
+          name: transactionId
+          schema:
+            type: string
+          required: true
+          description: 取引ID
+      responses:
+        204:
+          description: "successful operation"
+        400:
+          description: "Bad Request"
+  /transactions/transfer/start:
+    post:
+      tags:
+      - "転送取引エンドポイント"
+      summary: "転送取引開始"
+      description: "取引を開始します。取引の期限が切れると取引を確定することはできなくなります。 アプリケーション側で十分な期間を想定し、期限を\
+        セットしてください。"
+      operationId: "startTransferTransaction"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StartTransferTransactionParams"
+        description: ""
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransferTransaction"
+      security:
+      - adminAuth: []
+  /transactions/transfer/{transactionId}/confirm:
+    put:
+      tags:
+      - "転送取引エンドポイント"
+      summary: "転送取引確定"
+      description: "取引を確定します。有効期限を超過していた場合、ステータスコード400を返却します。"
+      operationId: "confirmTransferTransaction"
+      parameters:
+        - in: path
+          name: transactionId
+          schema:
+            type: string
+          required: true
+          description: 取引ID
+      responses:
+        204:
+          description: "successful operation"
+        400:
+          description: "Bad Request"
+  /transactions/transfer/{transactionId}/cancel:
+    put:
+      tags:
+      - "転送取引エンドポイント"
+      summary: "転送取引中止"
+      description: "取引を中止します。すでに確定済の場合、ステータスコード400を返却します。"
+      operationId: "cancelTransferTransaction"
+      parameters:
+        - in: path
+          name: transactionId
+          schema:
+            type: string
+          required: true
+          description: 取引ID
+      responses:
+        204:
+          description: "successful operation"
+        400:
+          description: "Bad Request"
+components:
+  securitySchemes:
+    adminAuth:
+      type: oauth2
+      description: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://pecorino-admin-development.auth.ap-northeast-1.amazoncognito.com/oauth2/token
+          refreshUrl: https://pecorino-admin-development.auth.ap-northeast-1.amazoncognito.com/oauth2/token
+          # scopes:
+          #   read: Grants read access
+          #   write: Grants write access
+          #   admin: Grants access to admin operations
+  #-------------------------------
+  # Reusable schemas (data models)
+  #-------------------------------
+  schemas:
+    Account:
+      type: "object"
+      properties:
+        accountNumber:
+          type: "string"
+          description: "口座番号"
+        name:
+          type: "string"
+          description: "口座名義"
+        balance:
+          type: "integer"
+          description: "残高"
+        availableBalance:
+          type: "integer"
+          description: "利用可能残高"
+      description: "口座"
+      example:
+        balance: 0
+        name: "name"
+        accountNumber: "accountNumber"
+        availableBalance: 6
+    OpenAccountParams:
+      type: "object"
+      properties:
+        accountNumber:
+          type: "string"
+          description: "口座番号"
+        name:
+          type: "string"
+          description: "口座名義"
+      example:
+        name: "name"
+        accountNumber: "accountNumber"
+    TransactionStatus:
+      type: "string"
+      description: "取引状況"
+      enum:
+      - "InProgress"
+      - "Canceled"
+      - "Confirmed"
+      - "Expired"
+    TransactionAgent:
+      type: "object"
+      properties:
+        typeOf:
+          type: "string"
+          description: "進行人タイプ"
+        id:
+          type: "string"
+          description: "進行人ID"
+        name:
+          type: "string"
+          description: "進行人名"
+        url:
+          type: "string"
+          description: "進行人URL"
+      description: "取引進行人"
+      example:
+        name: "name"
+        id: "id"
+        typeOf: "typeOf"
+        url: "url"
+    TransactionRecipient:
+      type: "object"
+      properties:
+        typeOf:
+          type: "string"
+          description: "受取人タイプ"
+        id:
+          type: "string"
+          description: "受取人ID"
+        name:
+          type: "string"
+          description: "受取人名"
+        url:
+          type: "string"
+          description: "受取人URL"
+      description: "取引受取人"
+      example:
+        name: "name"
+        id: "id"
+        typeOf: "typeOf"
+        url: "url"
+    StartDepositTransactionParams:
+      type: "object"
+      properties:
+        toAccountNumber:
+          type: "string"
+          description: "入金先口座番号"
+        expires:
+          type: "string"
+          format: "date-time"
+          description: "取引期限"
+        agent:
+          $ref: "#/components/schemas/TransactionAgent"
+        recipient:
+          $ref: "#/components/schemas/TransactionRecipient"
+        amount:
+          type: "integer"
+          description: "金額"
+        notes:
+          type: "string"
+          description: "取引説明"
+      description: "入金取引開始パラメーター"
+      example:
+        expires: "2000-01-23T04:56:07.000+00:00"
+        agent:
+          name: "name"
+          id: "id"
+          typeOf: "typeOf"
+          url: "url"
+        amount: 0
+        notes: "notes"
+        toAccountNumber: "toAccountNumber"
+        recipient:
+          name: "name"
+          id: "id"
+          typeOf: "typeOf"
+          url: "url"
+    StartWithdrawTransactionParams:
+      type: "object"
+      properties:
+        fromAccountNumber:
+          type: "string"
+          description: "出金元口座番号"
+        expires:
+          type: "string"
+          format: "date-time"
+          description: "取引期限"
+        agent:
+          $ref: "#/components/schemas/TransactionAgent"
+        recipient:
+          $ref: "#/components/schemas/TransactionRecipient"
+        amount:
+          type: "integer"
+          description: "金額"
+        notes:
+          type: "string"
+          description: "取引説明"
+      description: "出金取引開始パラメーター"
+      example:
+        fromAccountNumber: "fromAccountNumber"
+        expires: "2000-01-23T04:56:07.000+00:00"
+        agent:
+          name: "name"
+          id: "id"
+          typeOf: "typeOf"
+          url: "url"
+        amount: 0
+        notes: "notes"
+        recipient:
+          name: "name"
+          id: "id"
+          typeOf: "typeOf"
+          url: "url"
+    StartTransferTransactionParams:
+      type: "object"
+      properties:
+        fromAccountNumber:
+          type: "string"
+          description: "転送元口座番号"
+        toAccountNumber:
+          type: "string"
+          description: "転送先口座番号"
+        expires:
+          type: "string"
+          format: "date-time"
+          description: "取引期限"
+        agent:
+          $ref: "#/components/schemas/TransactionAgent"
+        recipient:
+          $ref: "#/components/schemas/TransactionRecipient"
+        amount:
+          type: "integer"
+          description: "金額"
+        notes:
+          type: "string"
+          description: "取引説明"
+      description: "転送取引開始パラメーター"
+      example:
+        fromAccountNumber: "fromAccountNumber"
+        expires: "2000-01-23T04:56:07.000+00:00"
+        agent:
+          name: "name"
+          id: "id"
+          typeOf: "typeOf"
+          url: "url"
+        amount: 0
+        notes: "notes"
+        toAccountNumber: "toAccountNumber"
+        recipient:
+          name: "name"
+          id: "id"
+          typeOf: "typeOf"
+          url: "url"
+    DepositTransaction:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          description: "取引ID"
+        status:
+          $ref: "#/components/schemas/TransactionStatus"
+        startDate:
+          type: "string"
+          format: "date-time"
+          description: "開始日時"
+        endDate:
+          type: "string"
+          format: "date-time"
+          description: "終了日時"
+        expires:
+          type: "string"
+          format: "date-time"
+          description: "確定期限"
+        agent:
+          $ref: "#/components/schemas/TransactionAgent"
+        recipient:
+          $ref: "#/components/schemas/TransactionRecipient"
+      description: "入金取引"
+      example:
+        expires: "2000-01-23T04:56:07.000+00:00"
+        agent:
+          name: "name"
+          id: "id"
+          typeOf: "typeOf"
+          url: "url"
+        endDate: "2000-01-23T04:56:07.000+00:00"
+        recipient:
+          name: "name"
+          id: "id"
+          typeOf: "typeOf"
+          url: "url"
+        id: "id"
+        startDate: "2000-01-23T04:56:07.000+00:00"
+        status: {}
+    WithdrawTransaction:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          description: "取引ID"
+        status:
+          $ref: "#/components/schemas/TransactionStatus"
+        startDate:
+          type: "string"
+          format: "date-time"
+          description: "開始日時"
+        endDate:
+          type: "string"
+          format: "date-time"
+          description: "終了日時"
+        expires:
+          type: "string"
+          format: "date-time"
+          description: "確定期限"
+        agent:
+          $ref: "#/components/schemas/TransactionAgent"
+        recipient:
+          $ref: "#/components/schemas/TransactionRecipient"
+      description: "出金取引"
+      example:
+        expires: "2000-01-23T04:56:07.000+00:00"
+        agent:
+          name: "name"
+          id: "id"
+          typeOf: "typeOf"
+          url: "url"
+        endDate: "2000-01-23T04:56:07.000+00:00"
+        recipient:
+          name: "name"
+          id: "id"
+          typeOf: "typeOf"
+          url: "url"
+        id: "id"
+        startDate: "2000-01-23T04:56:07.000+00:00"
+        status: {}
+    TransferTransaction:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          description: "取引ID"
+        status:
+          $ref: "#/components/schemas/TransactionStatus"
+        startDate:
+          type: "string"
+          format: "date-time"
+          description: "開始日時"
+        endDate:
+          type: "string"
+          format: "date-time"
+          description: "終了日時"
+        expires:
+          type: "string"
+          format: "date-time"
+          description: "確定期限"
+        agent:
+          $ref: "#/components/schemas/TransactionAgent"
+        recipient:
+          $ref: "#/components/schemas/TransactionRecipient"
+      description: "転送取引"
+      example:
+        expires: "2000-01-23T04:56:07.000+00:00"
+        agent:
+          name: "name"
+          id: "id"
+          typeOf: "typeOf"
+          url: "url"
+        endDate: "2000-01-23T04:56:07.000+00:00"
+        recipient:
+          name: "name"
+          id: "id"
+          typeOf: "typeOf"
+          url: "url"
+        id: "id"
+        startDate: "2000-01-23T04:56:07.000+00:00"
+        status: {}
+    MoneyTransferAction:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          description: "取引ID"
+        status:
+          type: "string"
+          description: "取引ID"
+        startDate:
+          type: "string"
+          format: "date-time"
+          description: "開始日時"
+        endDate:
+          type: "string"
+          format: "date-time"
+          description: "終了日時"
+        purpose:
+          type: "object"
+          description: "取引"
+          properties: {}
+        amount:
+          type: "integer"
+          description: "金額"
+        fromLocation:
+          # schema:
+          #   oneOf:
+          #     - $ref: "#/components/schemas/MoneyTransferAction_fromLocation"
+          #     - $ref: "#/components/schemas/MoneyTransferAction_fromLocation"
+          $ref: "#/components/schemas/MoneyTransferAction_fromLocation"
+        toLocation:
+          $ref: "#/components/schemas/MoneyTransferAction_toLocation"
+      description: "転送アクション"
+      example:
+        amount: 0
+        endDate: "2000-01-23T04:56:07.000+00:00"
+        purpose: "{}"
+        id: "id"
+        fromLocation:
+          name: "name"
+          accountNumber: "accountNumber"
+          typeOf: "typeOf"
+        toLocation:
+          name: "name"
+          accountNumber: "accountNumber"
+          typeOf: "typeOf"
+        startDate: "2000-01-23T04:56:07.000+00:00"
+        status: "status"
+    MoneyTransferAction_fromLocation:
+      properties:
+        typeOf:
+          type: "string"
+          description: "口座タイプ"
+        accountNumber:
+          type: "string"
+          description: "口座番号"
+        name:
+          type: "string"
+          description: "名前"
+      description: "転送元"
+      example:
+        name: "name"
+        accountNumber: "accountNumber"
+        typeOf: "typeOf"
+    MoneyTransferAction_toLocation:
+      properties:
+        typeOf:
+          type: "string"
+          description: "口座タイプ"
+        accountNumber:
+          type: "string"
+          description: "口座番号"
+        name:
+          type: "string"
+          description: "名前"
+      description: "転送先"
+      example:
+        name: "name"
+        accountNumber: "accountNumber"
+        typeOf: "typeOf"
